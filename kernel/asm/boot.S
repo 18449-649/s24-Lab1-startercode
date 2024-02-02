@@ -1,9 +1,7 @@
 /* boot.s
- * Assembler startup file for the STM32F103
+ * Assembler startup file for the STM32
  * Ford Seidel  2019-01-31
  * Ronit Banerjee
- *
- * Adapted from Tom Trebisky
  */
 
 # The Cortex M4 is a thumb only processor
@@ -14,11 +12,12 @@
 
 .global ivt
 ivt:
-.word   0                   /* stack top address */
-.word   0                   /* 1 Reset */
+@ TODO: add the stack and the reset handler addr here.
+.word   __msp_stack_top     /* stack top address */
+.word   _reset_             /* 1 Reset */
 .word   _nmi_               /* 2 NMI */
 .word   _hard_fault_        /* 3 Hard Fault */
-.word   spin                /* 4 MM Fault */
+.word   _mm_fault_          /* 4 MM Fault */
 .word   _bus_fault_         /* 5 Bus Fault */
 .word   _usage_fault_       /* 6 Usage Fault */
 .word   spin                /* 7 RESERVED */
@@ -28,8 +27,8 @@ ivt:
 .word   _svc_asm_handler_   /* 11 SV call */
 .word   spin                /* 12 Debug reserved */
 .word   spin                /* 13 RESERVED */
-.word   spin                /* 14 PendSV */
-.word   spin                /* 15 SysTick */
+.word   _pend_sv_           /* 14 PendSV */
+.word   _sys_tick_asm_      /* 15 SysTick */
 .word   spin                /* 16 IRQ0 Window Watchdog Interrupt */
 .word   spin                /* 17 IRQ1 PVD */
 .word   spin                /* 18 IRQ2 TAMPER */
@@ -41,13 +40,13 @@ ivt:
 .word   spin                /* 24 IRQ8 EXTI2   */
 .word   spin                /* 25 IRQ9 EXTI3 */
 .word   spin                /* 26 IRQ10 EXTI4 */
-.word   spin                /* 27 IRQ11 DMA1_Stream0 */
-.word   spin                /* 28 IRQ12 DMA1_Stream1 */
-.word   spin                /* 29 IRQ13 DMA1_Stream2 */
-.word   spin                /* 30 IRQ14 DMA1_Stream3 */
-.word   spin                /* 31 IRQ15 DMA1_Stream4 */
-.word   spin                /* 32 IRQ16 DMA1_Stream5 */
-.word   spin                /* 33 IRQ17 DMA1_Stream6 */
+.word   spin                /* 27 IRQ11 DMA1_Channel1   */
+.word   spin                /* 28 IRQ12 DMA1_Channel2   */
+.word   spin                /* 29 IRQ13 DMA1_Channel3 */
+.word   spin                /* 30 IRQ14 DMA1_Channel4 */
+.word   spin                /* 31 IRQ15 DMA1_Channel5   */
+.word   spin                /* 32 IRQ16 DMA1_Channel6   */
+.word   spin                /* 33 IRQ17 DMA1_Channel7 */
 .word   spin                /* 34 IRQ18 ADC1_2 */
 .word   spin                /* 35 IRQ19 CAN1_TX   */
 .word   spin                /* 36 IRQ20 CAN1_TX0   */
@@ -102,29 +101,74 @@ ivt:
 .section .text
 
 .thumb_func
-spin: bkpt
+spin:
+  bkpt
 
 .thumb_func
-_nmi_ : bkpt
+_nmi_ :
+  bkpt
 
 .thumb_func
-_hard_fault_ : bkpt
+_hard_fault_ :
+  bkpt
 
 .thumb_func
-_bus_fault_ : bkpt
+_mm_fault_:
+  bkpt
 
 .thumb_func
-_usage_fault_ : bkpt
+_bus_fault_ : 
+  bkpt
+
+.thumb_func
+_usage_fault_ : 
+  bkpt
+
+.thumb_func
+_pend_sv_ :
+  bkpt
+
+.thumb_func
+_spi1_handler:
+  bkpt
 
 .thumb_func
 .global _reset_
 _reset_:
-  bl kernel_main
-  b  sys_exit
+  LDR r3, =_erodata
+  LDR r4, =_k_data
+  LDR r5, =_data_size
+  CMP r5, r0
+  BEQ .loadbss
+  ADD r5, r5, r3 
+.loadVariables:	
+	LDR r8, [r3] 
+	STR r8, [r4] 
+        ADD r3, r3, #1  
+	ADD r4, r4, #1 
+	CMP r3, r5 
+	BLT .loadVariables
+.loadbss:
+  LDR r6, =_bss_start 
+  LDR r7, =_bss_size
+  CMP r7, r0 
+	BEQ .branch	
+	ADD r7, r7, r6
+.clearbss:
+	STR r0, [r6]
+	ADD r6, r6, #1
+	CMP r6, r7
+	BLT .clearbss 
+.branch:  
+	bl kernel_main
+  
+
+.thumb_func
+.global _sys_tick_asm_
+_sys_tick_asm_:
+  bkpt
 
 .thumb_func
 .global _svc_asm_handler_
 _svc_asm_handler_:
-  mrs r0, psp             // build exception stack frame
-  b svc_c_handler
-  
+  bkpt
