@@ -1,30 +1,27 @@
 /**
- * @file kernel.c
+ * @file     kernel.c
  *
- * @brief      Kernel entry point
+ * @brief    Kernel entry point
  *
- * @date       
- * @author     
+ * @date     20 Oct 2019
+ *
+ * @author   Benjamin Huang <zemingbh@andrew.cmu.edu>
  */
 
 #include "arm.h"
 #include "kernel.h"
 #include "printk.h"
-#include "uart_polling.h"
+#include "servok.h"
+#include "uart.h"
 
-/** @brief Baud Rate */
-#define BAUD (115200)
+#define UART_BAUD_RATE 138
 
 int kernel_main( void ) {
+
   init_349(); // DO NOT REMOVE THIS LINE
-  uart_polling_init (BAUD);
-  char input;
-  while(1){
-  input = uart_polling_get_byte();
-    while(!input){
-      input = uart_polling_get_byte();
-    }
-    uart_polling_put_byte(input);
-  }
+  uart_init( UART_BAUD_RATE );
+  enter_user_mode();
+
   return 0;
+
 }
