@@ -1,32 +1,19 @@
 /**
  * @file 
  *
- * @brief      
+ * @brief          
  *
  * @date       
- *
- * @author     
+ * @author  Ayesha Gupta   
+ * @author  Sruti Srinidhi   
  */
 
 #include <unistd.h>
 #include <syscall.h>
+#include "gpio.h"
+#include "timer.h"
 
 #define UNUSED __attribute__((unused))
-
-void *sys_sbrk(UNUSED int incr){
-  return NULL;
-}
-
-int sys_write(UNUSED int file, UNUSED char *ptr, UNUSED int len){
-  return -1;
-}
-
-int sys_read(UNUSED int file, UNUSED char *ptr, UNUSED int len){
-  return -1;
-}
-
-void sys_exit(UNUSED int status){
-}
 
 /**
  * @brief Enables a specific servo channel based on the parameters
@@ -36,6 +23,7 @@ void sys_exit(UNUSED int status){
  * @return * int 
  */
 int sys_servo_enable(UNUSED uint8_t channel, UNUSED uint8_t enabled){
+  
 }
 
 /**
@@ -46,4 +34,5 @@ int sys_servo_enable(UNUSED uint8_t channel, UNUSED uint8_t enabled){
  * @return int 
  */
 int sys_servo_set(UNUSED uint8_t channel, UNUSED uint8_t angle){
+
 }

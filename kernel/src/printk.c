@@ -10,6 +10,7 @@
 #include <unistd.h>
 #include <stdarg.h>
 #include <uart_polling.h>
+#include <uart.h>
 
 
 /**
@@ -50,11 +51,11 @@ static void printnumk(uint8_t base, uint32_t num) {
   // print result
   if (prefix) {
     while (*prefix) {
-      uart_polling_put_byte(*prefix++);
+      uart_put_byte(*prefix++);
     }
   }
   while (++ptr != &buf[MAXBUF]) {
-    uart_polling_put_byte(*ptr);
+    uart_put_byte(*ptr);
   }
 }
 
@@ -68,7 +69,7 @@ int printk(const char *fmt, ...) {
   while (*fmt) {
     // handle normal characters
     if (*fmt != '%') {
-      uart_polling_put_byte(*fmt++);
+      uart_put_byte(*fmt++);
       continue;
     }
     fmt++;
@@ -78,7 +79,7 @@ int printk(const char *fmt, ...) {
       case 'd': { // signed decimal
         int32_t num = va_arg(args, int32_t);
         if (num < 0) {
-          uart_polling_put_byte('-');
+          uart_put_byte('-');
           printnumk(10, -num);
         } else {
           printnumk(10, num);
@@ -108,7 +109,7 @@ int printk(const char *fmt, ...) {
       case 's': { // string
         int8_t *byte_ptr = (int8_t *)va_arg(args, int32_t);
         while (*byte_ptr) {
-          uart_polling_put_byte(*byte_ptr);
+          uart_put_byte(*byte_ptr);
           byte_ptr++;
         }
         break;
@@ -116,12 +117,12 @@ int printk(const char *fmt, ...) {
 
       case 'c': { // character
         int32_t byte = va_arg(args, int32_t);
-        uart_polling_put_byte(byte);
+        uart_put_byte(byte);
         break;
       }
 
       case '%': { // escaped percent symbol
-        uart_polling_put_byte('%');
+        uart_put_byte('%');
         break;
       }
 
