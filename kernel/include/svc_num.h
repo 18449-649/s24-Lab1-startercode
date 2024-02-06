@@ -55,9 +55,6 @@
 /** @brief SVC number for sleep_till_interrupt */
 #define SVC_SLEEP_TILL_INT 21
 
-/** @brief SVC number for servo_enable() */
-#define SVC_SERVO_ENABLE   22
-/** @brief SVC number for servo_set() */
-#define SVC_SERVO_SET 23
+
 
 #endif /* _SVC_NUM_H_ */
