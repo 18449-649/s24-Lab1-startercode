@@ -11,7 +11,6 @@
 #include "arm.h"
 #include "kernel.h"
 #include "printk.h"
-#include "servok.h"
 #include "uart.h"
 
 #define UART_BAUD_RATE 138
